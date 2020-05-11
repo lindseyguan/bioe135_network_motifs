@@ -1,3 +1,41 @@
 import csv
 import networkx as nx
 
+G_all = nx.DiGraph() # supports directed graphs but no parallel edges allowed
+G_strong = nx.DiGraph() # for interactions supported with "Strong" evidence
+tf_tf_edge_full = []
+tf_dict = {}
+
+with open('Data/network_tf_tf_data_only.txt', newline='') as tf_data:
+    tf_data_lines = csv.reader(tf_data, delimiter='\n')
+    for row in tf_data_lines:
+        effect = row[0].split('\t')[2:3]
+        evidence = row[0].split('\t')[4:5]
+        entry = row[0].split('\t')[0:2] + effect + evidence
+        tf_tf_edge_full.append(entry)
+
+node_label = 0
+for interaction in tf_tf_edge_full:
+    tf1 = interaction[0].lower()
+    tf2 = interaction[1].lower()
+    evidence = interaction[3].lower()
+
+    if tf1 in tf_dict.keys():
+        pass
+    else:
+        tf_dict[tf1] = node_label
+        node_label += 1
+    
+    if tf2 in tf_dict.keys():
+        pass
+    else:
+        tf_dict[tf2] = node_label
+        node_label += 1
+
+    G_all.add_edge(tf_dict[tf1], tf_dict[tf2])
+    if (evidence == 'strong'):
+        G_strong.add_edge(tf_dict[tf1], tf_dict[tf2])
+
+
+nx.write_gml(G_all, 'tf_tf_graph_all.gml')
+nx.write_gml(G_strong, 'tf_tf_graph_strong.gml')
